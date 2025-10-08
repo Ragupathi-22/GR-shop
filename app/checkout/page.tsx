@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 
 const CheckoutPage = () => {
   const { cart, cartTotal } = useCart();
-  const { isAuthenticated } = useAuth();
+  const {user, isAuthenticated } = useAuth();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -28,6 +28,11 @@ const CheckoutPage = () => {
       [name]: value,
     }));
   };
+  useEffect(() => {
+  if (user?.email) {
+    setFormData(prev => ({ ...prev, email: user.email }));
+  }
+}, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -176,6 +181,7 @@ const CheckoutPage = () => {
                         value={formData.email}
                         onChange={handleChange}
                         required
+                        readOnly
                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
