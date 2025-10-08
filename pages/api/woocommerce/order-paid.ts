@@ -4,9 +4,11 @@ import { query } from "../../../lib/db";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).send("Method not allowed");
   try {
-    const { id, status, customer_id } = req.body;
+    const { id, status, customer_email } = req.body;
     if (status === "processing" || status === "completed") {
-      await query("DELETE FROM wp_user_cart WHERE user_id = ?", [customer_id]);
+      // await query("DELETE FROM wp_user_cart WHERE user_id = ?", [customer_id]);
+      await query("DELETE FROM wp_user_cart WHERE user_email = ?", [customer_email]);
+
     }
     res.status(200).json({ success: true });
   } catch (err: any) {

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useAuth } from "./AuthContext"; 
+import { useAuth } from "./AuthContext";
 
 export type CartItem = {
   id: number;
@@ -68,13 +68,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       window.location.href = "/login";
       return;
     }
+    const userEmail = user.email;
     setCartLoading(true);
     try {
       const res = await fetch("/api/cart/add", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(product),
+        body: JSON.stringify({
+          id: product.id,
+          quantity: product.quantity,
+          name: product.name,
+          userEmail: userEmail,
+        })
+
       });
       if (!res.ok) {
         const err = await res.json();

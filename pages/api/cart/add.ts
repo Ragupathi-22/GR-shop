@@ -12,10 +12,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!token) return res.status(401).json({ message: "Not authenticated" });
 
   const decoded: any = verifyToken(token);
-  if (!decoded?.data?.user?.id) return res.status(401).json({ message: "Invalid token" });
+  if (!decoded?.data?.user?.id)
+    return res.status(401).json({ message: "Invalid token" });
 
   const userId = decoded.data.user.id;
-  const { id, quantity } = req.body;
+  const { id, quantity ,userEmail} = req.body;
 
   try {
     const existing = (await query(
@@ -30,8 +31,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ]);
     } else {
       await query(
-        "INSERT INTO wp_user_cart (user_id, product_id, quantity) VALUES (?, ?, ?)",
-        [userId, id, quantity]
+        "INSERT INTO wp_user_cart (user_id, user_email, product_id, quantity) VALUES (?, ?, ?, ?)",
+        [userId, userEmail, id, quantity] // ✅ include email
       );
     }
 
