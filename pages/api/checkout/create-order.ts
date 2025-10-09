@@ -164,6 +164,7 @@ import cookie from "cookie";
 
 
 
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST")
     return res.status(405).json({ message: "Method not allowed" });
@@ -174,6 +175,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    // Authenticate user
     const cookies = cookie.parse(req.headers.cookie || "");
     const token = cookies.token;
     if (!token) return res.status(401).json({ message: "Not authenticated" });
@@ -182,6 +184,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!decoded?.data?.user?.id) return res.status(401).json({ message: "Invalid token" });
     const userId = decoded.data.user.id;
 
+    // Get cart
     const cartResult = await query("SELECT * FROM wp_user_cart WHERE user_id = ?", [userId]);
     const cartItems: any[] = Array.isArray(cartResult) ? cartResult : [];
     if (cartItems.length === 0) return res.status(400).json({ message: "Cart is empty" });
@@ -191,23 +194,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       quantity: item.quantity,
     }));
 
-    // Prepare order data with payment method handling
+    // Prepare WooCommerce order data
     const orderData: any = {
       payment_method: paymentMethod,
       payment_method_title: paymentMethod === "cod" ? "Cash on Delivery" : "Razorpay",
-      set_paid: paymentMethod === "razorpay", // mark paid if Razorpay
+      set_paid: paymentMethod === "razorpay",
       customer_id: userId,
       line_items,
       billing: address.billing,
       shipping: address.shipping,
       status: paymentMethod === "cod" ? "pending" : "processing",
+      meta_data: [],
     };
 
-    // Attach payment details to order data if Razorpay
+    // Add Razorpay payment info to meta_data
     if (paymentMethod === "razorpay" && paymentDetails) {
-      orderData.payment_details = paymentDetails; // adjust according to WooCommerce expectations
+      orderData.meta_data.push(
+        { key: "_transaction_id", value: paymentDetails.razorpay_payment_id },
+        { key: "_payment_method_title", value: "Razorpay" },
+        { key: "_payment_method", value: "razorpay" }
+      );
     }
 
+    // Create order in WooCommerce
     const orderRes = await fetch(
       `${process.env.WP_URL}/wp-json/wc/v3/orders?consumer_key=${process.env.WC_CONSUMER_KEY}&consumer_secret=${process.env.WC_CONSUMER_SECRET}`,
       {
@@ -223,28 +232,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ message: "Failed to create order" });
     }
 
-    // TODO: Optionally clear the cart after successful order creation
-
-    // Generate auto-login token
-    const autoLoginRes = await fetch(
-      `${process.env.WP_URL}/wp-json/custom/v1/generate-autologin?user_id=${userId}`
-    );
-    const { token: autoLoginToken } = await autoLoginRes.json();
-
-    if (!autoLoginToken) {
-      return res.status(500).json({ message: "Auto-login token generation failed" });
-    }
-
-    const checkoutUrl = `${process.env.WP_URL}/custom-autologin?token=${autoLoginToken}&redirect=${encodeURIComponent(
-      "/Ragu/gr/checkout/order-received/" + order.id + "/?key=" + order.order_key
-    )}`;
+    // Clear user cart
+    await query("DELETE FROM wp_user_cart WHERE user_id = ?", [userId]);
 
     return res.status(200).json({
       success: true,
-      checkoutUrl,
+      orderId: order.id,
+      orderKey: order.order_key,
+      total: order.total,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
   }
 }
+

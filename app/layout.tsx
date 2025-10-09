@@ -25,7 +25,7 @@ export default function RootLayout({
             <Header />
             <main className="flex-grow">{children}</main>
             <Footer />
-            <Toaster position="top-right" />
+            <Toaster position="bottom-right" />
           </CartProvider>
         </AuthProvider>
       </body>
