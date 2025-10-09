@@ -761,7 +761,7 @@ const CheckoutPage = () => {
                           onChange={handleChange}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="ml-2 text-gray-700">Razorpay</span>
+                        <span className="ml-2 text-gray-700">Card, UPI</span>
                       </label>
                     </div>
                   </div>
