@@ -380,6 +380,7 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import Script from "next/script";
+import { Loader2 } from "lucide-react";
 
 declare global {
   interface Window {
@@ -554,6 +555,27 @@ const CheckoutPage = () => {
 
   return (
     <>
+      {checkoutLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+          <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-xl p-8 flex flex-col items-center">
+            {/* Lucide Spinner */}
+            <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-6" />
+
+            {/* Dynamic text */}
+            <p className="text-gray-800 text-center text-lg font-semibold">
+              {formData.paymentMethod === "razorpay"
+                ? "Processing your online payment..."
+                : "Placing your order..."}
+            </p>
+
+            {/* Optional subtext */}
+            <p className="text-gray-500 text-sm mt-2 text-center">
+              Please do not refresh or leave the page.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Razorpay checkout script loads from Razorpay CDN */}
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"
@@ -818,10 +840,10 @@ const CheckoutPage = () => {
         <div
           className="fixed inset-0 flex items-center justify-center  bg-opacity-30  z-50 bg-black/30 backdrop-blur-sm
 "
-         onClick={() => {
-                setOrderSuccess(null);
-                clearCart();
-              }} // click outside to close
+          onClick={() => {
+            setOrderSuccess(null);
+            clearCart();
+          }} // click outside to close
         >
           <div
             className="bg-white rounded-xl shadow-xl p-8 max-w-md w-full text-center relative"
@@ -850,10 +872,10 @@ const CheckoutPage = () => {
 
             <div className="flex justify-center gap-4">
               <button
-               onClick={() => {
-                setOrderSuccess(null);
-                clearCart();
-              }}
+                onClick={() => {
+                  setOrderSuccess(null);
+                  clearCart();
+                }}
                 className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition"
               >
                 Close

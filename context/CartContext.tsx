@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
+import { useGlobalLoading } from "./GlobalLoadingContext";
 
 export type CartItem = {
   id: number;
@@ -35,6 +36,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [cartLoading, setCartLoading] = useState(false);
+  const { setGlobalLoading: setGlobalLoading } = useGlobalLoading();
+  
 
   // Fetch cart from server on mount or user change
   useEffect(() => {
@@ -46,6 +49,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       setLoading(true);
       try {
+        setGlobalLoading(true);
         const res = await fetch("/api/cart", { method: "GET", credentials: "include" });
         if (res.ok) {
           const data = await res.json();
@@ -58,6 +62,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCart([]);
       } finally {
         setLoading(false);
+        setGlobalLoading(false);
       }
     };
     fetchCart();

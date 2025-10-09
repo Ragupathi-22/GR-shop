@@ -6,6 +6,8 @@ import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import "./globals.css";
+import { GlobalLoadingProvider } from "@/context/GlobalLoadingContext";
+import { GlobalLoader } from "@/components/loading/globalLoader";
 
 export const metadata: Metadata = {
   title: "My Ecommerce Store",
@@ -20,14 +22,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex flex-col min-h-screen">
-        <AuthProvider>
-          <CartProvider>
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-            <Toaster position="bottom-right" />
-          </CartProvider>
-        </AuthProvider>
+        <GlobalLoadingProvider>
+          <GlobalLoader />
+          <AuthProvider>
+            <CartProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+              <Toaster position="bottom-right" />
+            </CartProvider>
+          </AuthProvider>
+        </GlobalLoadingProvider>
       </body>
     </html>
   );
