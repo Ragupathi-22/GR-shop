@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ message: "Invalid token" });
 
   const userId = decoded.data.user.id;
-  const { id, quantity ,userEmail} = req.body;
+  const { id, quantity } = req.body;
 
   try {
     const existing = (await query(
@@ -31,8 +31,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ]);
     } else {
       await query(
-        "INSERT INTO wp_user_cart (user_id, user_email, product_id, quantity) VALUES (?, ?, ?, ?)",
-        [userId, userEmail, id, quantity] // ✅ include email
+        "INSERT INTO wp_user_cart (user_id, product_id, quantity) VALUES (?, ?, ?)",
+        [userId, id, quantity] 
       );
     }
 

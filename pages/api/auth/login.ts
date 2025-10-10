@@ -1,8 +1,10 @@
+import { fetchFullCustomerData } from "@/lib/getCustomerDetail";
 import type { NextApiRequest, NextApiResponse } from "next";
 import fetch from "node-fetch";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
+
   const { email, password } = req.body;
 
   try {
@@ -24,22 +26,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(wpRes.status).json({ message: wpData.message || "Invalid credentials" });
     }
 
+    const token = wpData.token;
+    const userId = wpData.user_id;
     const isProd = process.env.NODE_ENV === "production";
 
     // Set HttpOnly auth cookie only (do not expose userId cookie)
     res.setHeader(
       "Set-Cookie",
-      `token=${wpData.token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax; ${isProd ? "Secure" : ""}`
+      `token=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax; ${isProd ? "Secure" : ""}`
     );
 
-    res.status(200).json({
-      user: {
-        id: wpData.user_id,
-        name: wpData.user_display_name,
-        email: wpData.user_email || email,
-        token: wpData.token,
-      },
-    });
+    // Fetch WooCommerce customer info (billing/shipping addresses)
+    const customer = await fetchFullCustomerData(userId);
+
+    //  send structured user data
+    res.status(200).json({ user: { ...customer } });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Login failed" });

@@ -7,12 +7,16 @@ import { useAuth } from "@/context/AuthContext";
 export default function RegisterPage() {
   const router = useRouter();
   const { register, loading } = useAuth();
+
   const [formData, setFormData] = useState({
-    name: "",
+    first_name: "",
+    last_name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,7 +32,9 @@ export default function RegisterPage() {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.first_name.trim()) newErrors.first_name = "First name is required";
+    if (!formData.last_name.trim()) newErrors.last_name = "Last name is required";
+    if (!formData.username.trim()) newErrors.username = "Username is required";
     if (!formData.email.trim()) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email";
     if (!formData.password) newErrors.password = "Password is required";
@@ -42,7 +48,15 @@ export default function RegisterPage() {
     e.preventDefault();
     if (!validateForm()) return;
     try {
-      await register(formData.name, formData.email, formData.password);
+      // Pass fields as separate parameters to your register function
+      await register(
+        formData.first_name,
+        formData.last_name,
+        formData.username,
+        formData.email,
+        formData.password
+      );
+
       router.push("/"); // redirect after registration
     } catch (err: any) {
       setErrors({ form: err?.message || "Registration failed" });
@@ -60,20 +74,52 @@ export default function RegisterPage() {
         )}
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Full Name
+            <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">
+              First Name
             </label>
             <input
-              id="name"
-              name="name"
+              id="first_name"
+              name="first_name"
               type="text"
               required
-              value={formData.name}
+              value={formData.first_name}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              placeholder="John Doe"
+              placeholder="John"
             />
-            {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+            {errors.first_name && <p className="text-red-600 text-sm mt-1">{errors.first_name}</p>}
+          </div>
+          <div>
+            <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">
+              Last Name
+            </label>
+            <input
+              id="last_name"
+              name="last_name"
+              type="text"
+              required
+              value={formData.last_name}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Doe"
+            />
+            {errors.last_name && <p className="text-red-600 text-sm mt-1">{errors.last_name}</p>}
+          </div>
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+              Username
+            </label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              required
+              value={formData.username}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              placeholder="johndoe"
+            />
+            {errors.username && <p className="text-red-600 text-sm mt-1">{errors.username}</p>}
           </div>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">

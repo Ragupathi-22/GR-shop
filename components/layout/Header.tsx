@@ -38,7 +38,7 @@ export default function Header() {
           <nav className="hidden md:flex space-x-8">
             <Link href="/" className="text-gray-600 hover:text-blue-600 transition-colors">Home</Link>
             <Link href="/products" className="text-gray-600 hover:text-blue-600 transition-colors">Products</Link>
-            {/* <Link href="/products?category=smartphones" className="text-gray-600 hover:text-blue-600 transition-colors">Smartphones</Link> */}
+            <Link href="/cart" className="text-gray-600 hover:text-blue-600 transition-colors">Cart</Link>
             {/* <Link href="/products?category=laptops" className="text-gray-600 hover:text-blue-600 transition-colors">Laptops</Link> */}
           </nav>
 
@@ -68,11 +68,12 @@ export default function Header() {
               <div className="relative group">
                 <button className="text-gray-600 hover:text-blue-600 flex items-center space-x-1">
                   <UserIcon className="h-6 w-6" />
-                  <span className="text-sm">{user?.name.split(" ")[0]}</span>
+                 <span className="text-sm">{user?.name ? user.name : 'User'}</span>
+
                 </button>
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                   <Link href="/account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Account</Link>
-                  <Link href="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Orders</Link>
+                  {/* <Link href="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Orders</Link> */}
                   <button
                     onClick={logout}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -112,12 +113,12 @@ export default function Header() {
             <nav className="flex flex-col space-y-3">
               <Link href="/" className="text-gray-600 hover:text-blue-600 transition-colors" onClick={() => setIsMenuOpen(false)}>Home</Link>
               <Link href="/products" className="text-gray-600 hover:text-blue-600 transition-colors" onClick={() => setIsMenuOpen(false)}>Products</Link>
-              <Link href="/products?category=smartphones" className="text-gray-600 hover:text-blue-600 transition-colors" onClick={() => setIsMenuOpen(false)}>Smartphones</Link>
-              <Link href="/products?category=laptops" className="text-gray-600 hover:text-blue-600 transition-colors" onClick={() => setIsMenuOpen(false)}>Laptops</Link>
-              <Link href="/cart" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center" onClick={() => setIsMenuOpen(false)}>
-                <ShoppingCartIcon className="h-5 w-5 mr-2" />
+              <Link href="/cart" className="text-gray-600 hover:text-blue-600 transition-colors" onClick={() => setIsMenuOpen(false)}>Cart</Link>
+              {/* <Link href="/products?category=laptops" className="text-gray-600 hover:text-blue-600 transition-colors" onClick={() => setIsMenuOpen(false)}>Laptops</Link> */}
+              {/* <Link href="/cart" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center" onClick={() => setIsMenuOpen(false)}> */}
+                {/* <ShoppingCartIcon className="h-5 w-5 mr-2" />
                 Cart {cartCount > 0 && `(${cartCount})`}
-              </Link>
+              </Link> */}
 
               {isAuthenticated ? (
                 <>

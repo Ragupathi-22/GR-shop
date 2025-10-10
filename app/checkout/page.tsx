@@ -381,6 +381,7 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import Script from "next/script";
 import { Loader2 } from "lucide-react";
+import AddressForm, { AddressFormData } from "@/components/addressForm/AddressForm";
 
 declare global {
   interface Window {
@@ -393,28 +394,85 @@ const CheckoutPage = () => {
   const { user, isAuthenticated } = useAuth();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
+  // Address option toggle: saved or custom
+  const [useSavedAddress, setUseSavedAddress] = useState<boolean>(true);
+
+  // Saved address from user context
+  const savedAddress: AddressFormData = {
+    firstName: user?.address?.firstName || "",
+    lastName: user?.address?.lastName || "",
+    address1: user?.address?.address1 || "",
+    address2: user?.address?.address2 || "",
+    city: user?.address?.city || "",
+    state: user?.address?.state || "",
+    postalCode: user?.address?.postalCode || "",
+    phone: user?.address?.phone || "",
+  };
+
+  // Form data state
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
+    firstName: user?.first_name || "",
+    lastName: user?.last_name || "",
+    email: user?.email || "",
+    phone: savedAddress.phone,
+    address: savedAddress.address1,
+    city: savedAddress.city,
+    state: savedAddress.state,
+    zipCode: savedAddress.postalCode,
     paymentMethod: "cod",
   });
 
+  const [addressFormData, setAddressFormData] = useState<AddressFormData>(
+    useSavedAddress ? savedAddress : {
+      firstName: '',
+      lastName: '',
+      address1: '',
+      address2: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      phone: '',
+    }
+  );
+
   const [orderSuccess, setOrderSuccess] = useState<{ orderId: number; total: string } | null>(null);
+
+  // Update formData when user or useSavedAddress changes
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      firstName: user?.first_name || "",
+      lastName: user?.last_name || "",
+      email: user?.email || "",
+      phone: savedAddress.phone,
+      address: savedAddress.address1,
+      city: savedAddress.city,
+      state: savedAddress.state,
+      zipCode: savedAddress.postalCode,
+    }));
+    setAddressFormData(useSavedAddress ? savedAddress : {
+      firstName: '',
+      lastName: '',
+      address1: '',
+      address2: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      phone: '',
+    });
+  }, [user, useSavedAddress]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  useEffect(() => {
-    if (user?.email) setFormData((prev) => ({ ...prev, email: user.email }));
-  }, [user]);
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setAddressFormData((prev) => ({
+      ...prev, [name]: value,
+    }));
+  };
 
   const handleCheckoutCOD = async (address: any) => {
     try {
@@ -444,16 +502,13 @@ const CheckoutPage = () => {
       alert("Razorpay SDK not loaded yet. Please wait a moment.");
       return;
     }
-
     try {
       setCheckoutLoading(true);
-
       const orderRes = await fetch("/api/payment/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: cartTotal, currency: "INR" }),
       });
-
       const orderData = await orderRes.json();
       if (!orderData.id) throw new Error("Failed to create Razorpay order");
 
@@ -480,7 +535,6 @@ const CheckoutPage = () => {
               paymentDetails: response,
             }),
           });
-
           const createOrderData = await createOrderRes.json();
           if (createOrderData.success) {
             setOrderSuccess({ orderId: createOrderData.orderId, total: createOrderData.total });
@@ -510,24 +564,30 @@ const CheckoutPage = () => {
     e.preventDefault();
     if (cart.length === 0) return alert("Cart is empty.");
 
+    // Use saved or custom address depending on toggle
+    const addressToUse = useSavedAddress ? savedAddress : addressFormData;
+
+    // Compose address object in WooCommerce format
     const address = {
       billing: {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        address_1: formData.address,
-        city: formData.city,
-        state: formData.state,
-        postcode: formData.zipCode,
+        first_name: addressToUse.firstName,
+        last_name: addressToUse.lastName,
+        address_1: addressToUse.address1,
+        address_2: addressToUse.address2,
+        city: addressToUse.city,
+        state: addressToUse.state,
+        postcode: addressToUse.postalCode,
         email: formData.email,
-        phone: formData.phone,
+        phone: addressToUse.phone,
       },
       shipping: {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        address_1: formData.address,
-        city: formData.city,
-        state: formData.state,
-        postcode: formData.zipCode,
+        first_name: addressToUse.firstName,
+        last_name: addressToUse.lastName,
+        address_1: addressToUse.address1,
+        address_2: addressToUse.address2,
+        city: addressToUse.city,
+        state: addressToUse.state,
+        postcode: addressToUse.postalCode,
       },
     };
 
@@ -558,17 +618,12 @@ const CheckoutPage = () => {
       {checkoutLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
           <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-xl p-8 flex flex-col items-center">
-            {/* Lucide Spinner */}
             <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-6" />
-
-            {/* Dynamic text */}
             <p className="text-gray-800 text-center text-lg font-semibold">
               {formData.paymentMethod === "razorpay"
                 ? "Processing your online payment..."
                 : "Placing your order..."}
             </p>
-
-            {/* Optional subtext */}
             <p className="text-gray-500 text-sm mt-2 text-center">
               Please do not refresh or leave the page.
             </p>
@@ -576,13 +631,13 @@ const CheckoutPage = () => {
         </div>
       )}
 
-      {/* Razorpay checkout script loads from Razorpay CDN */}
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"
         strategy="afterInteractive"
         onLoad={() => console.log("✅ Razorpay script loaded")}
         onError={() => alert("❌ Failed to load Razorpay SDK")}
       />
+
       <div className="bg-gray-50 min-h-screen py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">Checkout</h1>
@@ -607,7 +662,7 @@ const CheckoutPage = () => {
                   )}
 
                   {/* Personal Information */}
-                  <div className="space-y-4">
+                  {/* <div className="space-y-4">
                     <h3 className="text-gray-700 font-medium">Personal Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -651,7 +706,6 @@ const CheckoutPage = () => {
                           value={formData.email}
                           onChange={handleChange}
                           required
-                          readOnly
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
@@ -670,72 +724,77 @@ const CheckoutPage = () => {
                         />
                       </div>
                     </div>
+                  </div> */}
+
+                  {/* Address selector */}
+                  <div className="mt-6 mb-4">
+                    {user?.address ? (
+                      <>
+                        <label className="mr-6 inline-flex items-center">
+                          <input
+                            type="radio"
+                            name="addressOption"
+                            value="saved"
+                            checked={useSavedAddress}
+                            onChange={() => {
+                              setUseSavedAddress(true);
+                              setAddressFormData(savedAddress);
+                            }}
+                            className="mr-2"
+                          />
+                          Use saved address
+                        </label>
+                        <label className="inline-flex items-center">
+                          <input
+                            type="radio"
+                            name="addressOption"
+                            value="custom"
+                            checked={!useSavedAddress}
+                            onChange={() => {
+                              setUseSavedAddress(false);
+                              setAddressFormData({
+                                firstName: '',
+                                lastName: '',
+                                address1: '',
+                                address2: '',
+                                city: '',
+                                state: '',
+                                postalCode: '',
+                                phone: '',
+                              });
+                            }}
+                            className="mr-2"
+                          />
+                          Enter new address
+                        </label>
+                      </>
+                    ) : (
+                      <p className="text-gray-700 mb-4">Please enter your shipping address below.</p>
+                    )}
                   </div>
 
-                  {/* Shipping Address */}
-                  <div className="space-y-4 border-t border-gray-200 pt-6">
-                    <h3 className="text-gray-700 font-medium">Shipping Address</h3>
-                    <div>
-                      <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                        Street Address *
-                      </label>
-                      <input
-                        type="text"
-                        id="address"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  {/* Address Form */}
+                  {!user?.address || !useSavedAddress ? (                    
+                      <AddressForm
+                        addressData={addressFormData}
+                        onChange={handleAddressChange}
+                        showButtons={false}
+                        isEditing={true}
                       />
+                  ) : (
+                    // Show saved address read-only if useSavedAddress is true
+                    <div className="space-y-2 mb-6 bg-gray-50 p-4 rounded-md">
+                      <p>
+                        {savedAddress.firstName} {savedAddress.lastName}
+                      </p>
+                      <p>{savedAddress.address1}</p>
+                      {savedAddress.address2 && <p>{savedAddress.address2}</p>}
+                      <p>
+                        {savedAddress.city}, {savedAddress.state} {savedAddress.postalCode}
+                      </p>
+                      <p>{savedAddress.phone}</p>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                          City *
-                        </label>
-                        <input
-                          type="text"
-                          id="city"
-                          name="city"
-                          value={formData.city}
-                          onChange={handleChange}
-                          required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
-                          State/Province *
-                        </label>
-                        <input
-                          type="text"
-                          id="state"
-                          name="state"
-                          value={formData.state}
-                          onChange={handleChange}
-                          required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-1">
-                          ZIP/Postal Code *
-                        </label>
-                        <input
-                          type="text"
-                          id="zipCode"
-                          name="zipCode"
-                          value={formData.zipCode}
-                          onChange={handleChange}
-                          required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  )}
 
                   {/* Payment Method */}
                   <div className="space-y-4 border-t border-gray-200 pt-6">
@@ -838,16 +897,15 @@ const CheckoutPage = () => {
       {/* Order Success Modal */}
       {orderSuccess && (
         <div
-          className="fixed inset-0 flex items-center justify-center  bg-opacity-30  z-50 bg-black/30 backdrop-blur-sm
-"
+          className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
           onClick={() => {
             setOrderSuccess(null);
             clearCart();
-          }} // click outside to close
+          }}
         >
           <div
             className="bg-white rounded-xl shadow-xl p-8 max-w-md w-full text-center relative"
-            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Success Icon */}
             <div className="flex justify-center mb-4">
@@ -858,17 +916,17 @@ const CheckoutPage = () => {
                 strokeWidth={2}
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 13l4 4L19 7"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
 
             <h2 className="text-2xl font-bold mb-2 text-gray-800">Order Placed Successfully!</h2>
-            <p className="text-gray-600 mb-1">Order ID: <span className="font-medium">{orderSuccess.orderId}</span></p>
-            <p className="text-gray-600 mb-6">Total: <span className="font-medium">${orderSuccess.total}</span></p>
+            <p className="text-gray-600 mb-1">
+              Order ID: <span className="font-medium">{orderSuccess.orderId}</span>
+            </p>
+            <p className="text-gray-600 mb-6">
+              Total: <span className="font-medium">${orderSuccess.total}</span>
+            </p>
 
             <div className="flex justify-center gap-4">
               <button
@@ -894,11 +952,8 @@ const CheckoutPage = () => {
           </div>
         </div>
       )}
-
-
     </>
   );
 };
 
 export default CheckoutPage;
-
