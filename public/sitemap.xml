@@ -1,4 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<sitemap><loc>https://gr-shop-2.vercel.app/sitemap-0.xml</loc></sitemap>
-</sitemapindex>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://gr-shop-2.vercel.app/</loc>
+  <lastmod>2025-10-15T08:33:31+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://gr-shop-2.vercel.app/products</loc>
+  <lastmod>2025-10-15T08:33:31+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://gr-shop-2.vercel.app/cart</loc>
+  <lastmod>2025-10-15T08:33:31+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://gr-shop-2.vercel.app/login</loc>
+  <lastmod>2025-10-15T08:33:31+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://gr-shop-2.vercel.app/products?category=new-arrivals</loc>
+  <lastmod>2025-10-15T08:33:31+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://gr-shop-2.vercel.app/products?category=smartphones</loc>
+  <lastmod>2025-10-15T08:33:31+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://gr-shop-2.vercel.app/products?category=laptops</loc>
+  <lastmod>2025-10-15T08:33:31+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://gr-shop-2.vercel.app/products?category=accessories</loc>
+  <lastmod>2025-10-15T08:33:31+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://gr-shop-2.vercel.app/products?category=wearables</loc>
+  <lastmod>2025-10-15T08:33:31+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://gr-shop-2.vercel.app/register</loc>
+  <lastmod>2025-10-15T08:33:31+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+
+</urlset>
