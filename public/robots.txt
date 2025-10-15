@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://gr-shop-2.vercel.app
+
+# Sitemaps
+Sitemap: https://gr-shop-2.vercel.app/sitemap.xml
