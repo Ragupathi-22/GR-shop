@@ -126,7 +126,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ params }) => {
         product.stock_status === "instock"
           ? "https://schema.org/InStock"
           : "https://schema.org/OutOfStock",
-      url: `https://yourwebsite.com/products/${product.id}`,
+      url: `https://gr-shop-2.vercel.app/products/${product.id}`,
     },
   };
 
