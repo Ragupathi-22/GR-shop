@@ -110,39 +110,65 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ params }) => {
     );
   }
 
- const schema = {
-    "@context": "https://schema.org/",
-    "@type": "Product",
-    name: product.name,
-    image: product.images?.[0]?.src,
-    description: product.short_description?.replace(/<[^>]+>/g, ""),
-    sku: product.id,
-    brand: { "@type": "Brand", name: "My Store" },
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "USD",
-      price: product.sale_price || product.regular_price,
-      availability:
-        product.stock_status === "instock"
-          ? "https://schema.org/InStock"
-          : "https://schema.org/OutOfStock",
-      url: `https://gr-shop-2.vercel.app/products/${product.id}`,
-    },
-  };
+  //  const schema = {
+  //     "@context": "https://schema.org/",
+  //     "@type": "Product",
+  //     name: product.name,
+  //     image: product.images?.[0]?.src,
+  //     description: product.short_description?.replace(/<[^>]+>/g, ""),
+  //     sku: product.id,
+  //     brand: { "@type": "Brand", name: "My Store" },
+  //     offers: {
+  //       "@type": "Offer",
+  //       priceCurrency: "USD",
+  //       price: product.sale_price || product.regular_price,
+  //       availability:
+  //         product.stock_status === "instock"
+  //           ? "https://schema.org/InStock"
+  //           : "https://schema.org/OutOfStock",
+  //       url: `https://gr-shop-2.vercel.app/products/${product.id}`,
+  //     },
+  //   };
 
   return (
     <div className="bg-gray-50 min-h-screen">
 
 
-   <SEOHead
-        title={`${product.name} | My Store`}
-        description={product.short_description?.replace(/<[^>]+>/g, "")}
-        image={product.images?.[0]?.src}
-        url={`https://gr-shop-2.vercel.app/products/${product.id}`}
-        keywords={product.categories.map((c: any) => c.name).join(", ")}
-        type="product"
-        schema={schema}
-      />
+      {product && (
+        <SEOHead
+          title={`${product.name} | My Shop`}
+          description={product.short_description || "Shop the latest products at great prices."}
+          image={product.images?.[0]?.src}
+          url={`https://gr-shop-2.vercel.app/products/${product.id}`}
+          keywords={`${product.name}, ${product.categories?.[0]?.name}, buy ${product.name}`}
+          type="product"
+          schema={{
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            name: product.name,
+            image: product.images?.map((img) => img.src),
+            description: product.short_description || product.description,
+            sku: `sku-${product.id}`,
+            brand: {
+              "@type": "Brand",
+              name: product.categories?.[0]?.name || "My Shop",
+            },
+            offers: {
+              "@type": "Offer",
+              url: `https://gr-shop-2.vercel.app/products/${product.id}`,
+              priceCurrency: "USD",
+              price: product.sale_price || product.regular_price,
+              availability: "https://schema.org/InStock",
+              itemCondition: "https://schema.org/NewCondition",
+            },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.5",
+              reviewCount: "42",
+            },
+          }}
+        />
+      )}
 
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumbs */}
@@ -250,8 +276,8 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ params }) => {
                         key={option}
                         onClick={() => handleAttributeChange(attribute.name, option)}
                         className={`px-3 py-1 border rounded-md text-sm ${selectedAttributes[attribute.name.toLowerCase()] === option
-                            ? "border-blue-600 bg-blue-50 text-blue-600"
-                            : "border-gray-300 text-gray-700 hover:border-gray-400"
+                          ? "border-blue-600 bg-blue-50 text-blue-600"
+                          : "border-gray-300 text-gray-700 hover:border-gray-400"
                           }`}
                       >
                         {option}

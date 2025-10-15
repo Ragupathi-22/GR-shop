@@ -26,9 +26,11 @@ export default function SEOHead({
     <Head>
       {/* Basic SEO */}
       <title>{title}</title>
+      <meta name="robots" content="index, follow" />
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
       <link rel="canonical" href={url} />
+
 
       {/* Open Graph (Facebook, WhatsApp, LinkedIn) */}
       <meta property="og:type" content={type} />
