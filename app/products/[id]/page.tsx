@@ -7,6 +7,7 @@ import { ShoppingCartIcon, HeartIcon, TruckIcon, ShieldCheckIcon, StarIcon } fro
 import { wooCommerceAPI, Product } from "@/services/api";
 import { useCart } from "@/context/CartContext";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
+import SEOHead from "@/components/SEOHead";
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
@@ -109,8 +110,40 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ params }) => {
     );
   }
 
+ const schema = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    name: product.name,
+    image: product.images?.[0]?.src,
+    description: product.short_description?.replace(/<[^>]+>/g, ""),
+    sku: product.id,
+    brand: { "@type": "Brand", name: "My Store" },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "USD",
+      price: product.sale_price || product.regular_price,
+      availability:
+        product.stock_status === "instock"
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      url: `https://yourwebsite.com/products/${product.id}`,
+    },
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen">
+
+
+   <SEOHead
+        title={`${product.name} | My Store`}
+        description={product.short_description?.replace(/<[^>]+>/g, "")}
+        image={product.images?.[0]?.src}
+        url={`https://gr-shop-2.vercel.app/products/${product.id}`}
+        keywords={product.categories.map((c: any) => c.name).join(", ")}
+        type="product"
+        schema={schema}
+      />
+
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumbs */}
         <nav className="mb-6 text-sm">
