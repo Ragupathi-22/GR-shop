@@ -22,30 +22,35 @@ export default function SEOHead({
   type = "website",
   schema,
 }: SEOHeadProps) {
+
+  const fullImageUrl = image.startsWith('http') ? image : `${url}${image}`;
+
   return (
     <Head>
-      {/* Basic SEO */}
       <title>{title}</title>
       <meta name="robots" content="index, follow" />
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
       <link rel="canonical" href={url} />
 
-
-      {/* Open Graph (Facebook, WhatsApp, LinkedIn) */}
+      {/* Open Graph */}
       <meta property="og:type" content={type} />
+      <meta property="og:site_name" content="My Store" />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={image} />
+      <meta property="og:image" content={fullImageUrl} />
       <meta property="og:url" content={url} />
 
       {/* Twitter Cards */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={image} />
+      <meta name="twitter:image" content={fullImageUrl} />
+      {/* Optional: add your Twitter handle */}
+      {/* <meta name="twitter:site" content="@yourhandle" /> */}
+      {/* <meta name="twitter:creator" content="@yourhandle" /> */}
 
-      {/* Structured Data (JSON-LD) */}
+      {/* Structured Data */}
       {schema && (
         <script
           type="application/ld+json"

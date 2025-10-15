@@ -110,26 +110,6 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ params }) => {
     );
   }
 
-  //  const schema = {
-  //     "@context": "https://schema.org/",
-  //     "@type": "Product",
-  //     name: product.name,
-  //     image: product.images?.[0]?.src,
-  //     description: product.short_description?.replace(/<[^>]+>/g, ""),
-  //     sku: product.id,
-  //     brand: { "@type": "Brand", name: "My Store" },
-  //     offers: {
-  //       "@type": "Offer",
-  //       priceCurrency: "USD",
-  //       price: product.sale_price || product.regular_price,
-  //       availability:
-  //         product.stock_status === "instock"
-  //           ? "https://schema.org/InStock"
-  //           : "https://schema.org/OutOfStock",
-  //       url: `https://gr-shop-2.vercel.app/products/${product.id}`,
-  //     },
-  //   };
-
   return (
     <div className="bg-gray-50 min-h-screen">
 
